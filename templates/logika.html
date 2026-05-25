@@ -2,6 +2,122 @@
 {% block title %}Logika{% endblock %}
 
 {% block content %}
+<style>
+/* CSS khusus untuk Bit Flipper */
+.bit-flipper-container {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(212, 175, 55, 0.15);
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 12px;
+    transition: var(--transition);
+}
+[data-theme="light"] .bit-flipper-container {
+    background: rgba(0, 0, 0, 0.02);
+    border-color: rgba(139, 105, 20, 0.2);
+}
+.bit-flipper-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 4px;
+    margin-bottom: 10px;
+}
+.bit-flip-btn {
+    flex: 1;
+    height: 38px;
+    border-radius: 8px;
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    background: var(--bg-btn);
+    color: var(--text-btn);
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    box-shadow: var(--shadow-btn);
+    padding-bottom: 8px;
+}
+.bit-flip-btn::after {
+    content: attr(data-label);
+    font-size: 0.5rem;
+    color: var(--text-muted);
+    position: absolute;
+    bottom: 2px;
+    opacity: 0.7;
+}
+.bit-flip-btn.active {
+    background: var(--gold-main);
+    color: #0c0b08;
+    border-color: var(--gold-bright);
+    box-shadow: var(--glow-gold-sm);
+    text-shadow: 0 0 4px rgba(255,255,255,0.5);
+}
+.bit-flip-btn.active::after {
+    color: #0c0b08;
+    font-weight: 800;
+}
+.bit-flip-btn:hover {
+    border-color: var(--gold-main);
+    background: var(--bg-btn-hover);
+}
+.bit-flip-btn.active:hover {
+    background: var(--gold-bright);
+}
+.bit-flipper-info {
+    display: flex;
+    justify-content: space-between;
+    background: var(--bg-display);
+    border-radius: 8px;
+    padding: 6px 12px;
+    border: 1px solid rgba(212, 175, 55, 0.1);
+    margin-bottom: 10px;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text-display-sub);
+}
+.bit-flipper-val strong {
+    color: var(--text-display);
+    margin-left: 4px;
+}
+.bit-flipper-actions {
+    display: flex;
+    gap: 6px;
+}
+.bit-action-btn {
+    flex: 1;
+    padding: 6px 4px;
+    border-radius: 8px;
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    background: rgba(212, 175, 55, 0.08);
+    color: var(--gold-main);
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: center;
+}
+.bit-action-btn:hover {
+    background: rgba(212, 175, 55, 0.15);
+    border-color: var(--gold-main);
+    box-shadow: var(--glow-gold-sm);
+}
+.bit-action-btn.btn-reset {
+    flex: 0.6;
+    border-color: rgba(200, 90, 80, 0.25);
+    background: rgba(200, 90, 80, 0.08);
+    color: #c0605a;
+}
+.bit-action-btn.btn-reset:hover {
+    background: rgba(200, 90, 80, 0.15);
+    border-color: #e07060;
+}
+</style>
+
 <div class="calculator-body animate-in">
     <div class="calc-top-strip"></div>
 
@@ -70,6 +186,30 @@
                             name="b" placeholder="contoh: 10"
                             value="{{ hasil.b if hasil and hasil.b is not none else '' }}">
                         <div style="font-size:0.7rem; color:rgba(126,255,178,0.4); text-align:right; margin-top:4px; font-family:'Share Tech Mono',monospace;" id="hintB"></div>
+                    </div>
+                </div>
+
+                <!-- Bit Flipper -->
+                <div class="keypad-section-label"><i class="bi bi-cpu-fill me-1"></i>Interactive 8-Bit Flipper</div>
+                <div class="bit-flipper-container animate-in">
+                    <div class="bit-flipper-row">
+                        <button type="button" class="bit-flip-btn" data-index="7" data-label="128" onclick="toggleFlipperBit(7)">0</button>
+                        <button type="button" class="bit-flip-btn" data-index="6" data-label="64" onclick="toggleFlipperBit(6)">0</button>
+                        <button type="button" class="bit-flip-btn" data-index="5" data-label="32" onclick="toggleFlipperBit(5)">0</button>
+                        <button type="button" class="bit-flip-btn" data-index="4" data-label="16" onclick="toggleFlipperBit(4)">0</button>
+                        <button type="button" class="bit-flip-btn" data-index="3" data-label="8" onclick="toggleFlipperBit(3)">0</button>
+                        <button type="button" class="bit-flip-btn" data-index="2" data-label="4" onclick="toggleFlipperBit(2)">0</button>
+                        <button type="button" class="bit-flip-btn" data-index="1" data-label="2" onclick="toggleFlipperBit(1)">0</button>
+                        <button type="button" class="bit-flip-btn" data-index="0" data-label="1" onclick="toggleFlipperBit(0)">0</button>
+                    </div>
+                    <div class="bit-flipper-info">
+                        <span class="bit-flipper-val">DEC:<strong id="flipperDec">0</strong></span>
+                        <span class="bit-flipper-val">HEX:<strong id="flipperHex">0x00</strong></span>
+                    </div>
+                    <div class="bit-flipper-actions">
+                        <button type="button" class="bit-action-btn" onclick="copyFlipperTo('A')">Salin ke A</button>
+                        <button type="button" class="bit-action-btn" onclick="copyFlipperTo('B')">Salin ke B</button>
+                        <button type="button" class="bit-action-btn btn-reset" onclick="resetFlipper()">Reset</button>
                     </div>
                 </div>
 
@@ -254,6 +394,67 @@ function quickInputLogic(val) {
     // Update hint
     hintA.textContent = inpA.value ? toBin(inpA.value) : '';
     hintB.textContent = inpB.value ? toBin(inpB.value) : '';
+}
+
+// State untuk bit flipper (8-bit)
+let flipperBits = [0, 0, 0, 0, 0, 0, 0, 0]; // Index 0 = Bit 0 (LSB), Index 7 = Bit 7 (MSB)
+
+function toggleFlipperBit(index) {
+    const btn = document.querySelector(`.bit-flip-btn[data-index="${index}"]`);
+    if (!btn) return;
+    
+    // Toggle state
+    flipperBits[index] = flipperBits[index] === 0 ? 1 : 0;
+    
+    // Update visual
+    btn.textContent = flipperBits[index];
+    if (flipperBits[index] === 1) {
+        btn.classList.add('active');
+    } else {
+        btn.classList.remove('active');
+    }
+    
+    // Hitung ulang desimal dan heksadesimal
+    updateFlipperValues();
+}
+
+function updateFlipperValues() {
+    let decVal = 0;
+    for (let i = 0; i < 8; i++) {
+        decVal += flipperBits[i] * Math.pow(2, i);
+    }
+    
+    const hexVal = '0x' + decVal.toString(16).toUpperCase().padStart(2, '0');
+    
+    document.getElementById('flipperDec').textContent = decVal;
+    document.getElementById('flipperHex').textContent = hexVal;
+}
+
+function copyFlipperTo(inputChar) {
+    let decVal = 0;
+    for (let i = 0; i < 8; i++) {
+        decVal += flipperBits[i] * Math.pow(2, i);
+    }
+    
+    const inputElement = document.getElementById('inputL' + inputChar);
+    if (inputElement) {
+        inputElement.value = decVal;
+        // Trigger input event agar biner hint terupdate
+        if (inputChar === 'A') {
+            hintA.textContent = toBin(decVal);
+        } else {
+            hintB.textContent = toBin(decVal);
+        }
+    }
+}
+
+function resetFlipper() {
+    flipperBits = [0, 0, 0, 0, 0, 0, 0, 0];
+    document.querySelectorAll('.bit-flip-btn').forEach(btn => {
+        btn.textContent = '0';
+        btn.classList.remove('active');
+    });
+    updateFlipperValues();
 }
 </script>
 {% endblock %}
