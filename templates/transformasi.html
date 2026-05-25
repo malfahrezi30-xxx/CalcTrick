@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+{% block title %}Transformasi{% endblock %}
+
+{% block content %}
+<div class="page-hero page-hero-transformasi">
+    <div class="container-xl">
+        <div class="page-hero-content">
+            <div class="page-badge"><i class="bi bi-arrow-left-right me-1"></i>Transformasi</div>
+            <h1 class="page-title">Transformasi Bilangan</h1>
+            <p class="page-subtitle">Konversi basis, suhu, mata uang, faktorial, dan Fibonacci.</p>
+        </div>
+    </div>
+</div>
+
+<div class="container-xl py-5">
+    <div class="row g-4">
+        <!-- ── Form ── -->
+        <div class="col-lg-5">
+            <div class="calc-card">
+                <div class="calc-card-header">
+                    <i class="bi bi-sliders me-2"></i>Pilih Jenis
+                </div>
+                <div class="calc-card-body">
+                    <!-- Tab Selector -->
+                    <div class="trans-tabs mb-4" id="transTabs">
+                        {% set tabs = [
+                            ('basis', 'bi-hash', 'Basis'),
+                            ('suhu', 'bi-thermometer-half', 'Suhu'),
+                            ('mata_uang', 'bi-currency-exchange', 'Kurs'),
+                            ('faktorial', 'bi-exclamation-lg', 'Faktorial'),
+                            ('fibonacci', 'bi-infinity', 'Fibonacci'),
+                        ] %}
+                        {% for id, icon, label in tabs %}
+                        <button type="button"
+                            class="trans-tab {% if tab_aktif == id %}active{% endif %}"
+                            data-tab="{{ id }}">
+                            <i class="bi {{ icon }}"></i>
+                            <span>{{ label }}</span>
+                        </button>
+                        {% endfor %}
+                    </div>
+
+                    <form method="POST" action="{{ url_for('transformasi') }}" id="transForm">
+                        <input type="hidden" name="tab_aktif" id="tabAktifInput" value="{{ tab_aktif }}">
+
+                        <!-- ── TAB: Konversi Basis ── -->
+                        <div class="tab-content-panel" id="panel-basis" {% if tab_aktif != 'basis' %}style="display:none"{% endif %}>
+                            <input type="hidden" name="jenis" value="basis" class="jenis-input">
+                            <div class="mb-3">
+                                <label class="form-label-custom">Nilai</label>
+                                <input type="text" class="form-control-custom" name="nilai_basis"
+                                    placeholder="cth: 255 atau FF atau 11111111"
+                                    value="{{ request.form.get('nilai_basis', '') if tab_aktif == 'basis' else '' }}">
+                            </div>
+                            <div class="row g-3 mb-4">
+                                <div class="col-6">
+                                    <label class="form-label-custom">Dari Basis</label>
+                                    <select class="form-select-custom" name="dari_basis">
+                                        {% for val, lbl in [('dec','Desimal (10)'),('bin','Biner (2)'),('oct','Oktal (8)'),('hex','Heksadesimal (16)')] %}
+                                        <option value="{{ val }}" {% if request.form.get('dari_basis', 'dec') == val and tab_aktif == 'basis' %}selected{% elif val == 'dec' and tab_aktif != 'basis' %}selected{% endif %}>{{ lbl }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label-custom">Ke Basis</label>
+                                    <select class="form-select-custom" name="ke_basis">
+                                        {% for val, lbl in [('dec','Desimal (10)'),('bin','Biner (2)'),('oct','Oktal (8)'),('hex','Heksadesimal (16)')] %}
+                                        <option value="{{ val }}" {% if request.form.get('ke_basis', 'bin') == val and tab_aktif == 'basis' %}selected{% elif val == 'bin' and tab_aktif != 'basis' %}selected{% endif %}>{{ lbl }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ── TAB: Suhu ── -->
+                        <div class="tab-content-panel" id="panel-suhu" {% if tab_aktif != 'suhu' %}style="display:none"{% endif %}>
+                            <input type="hidden" name="jenis" value="suhu" class="jenis-input">
+                            <div class="mb-3">
+                                <label class="form-label-custom">Nilai Suhu</label>
+                                <input type="number" step="any" class="form-control-custom" name="nilai_suhu"
+                                    placeholder="cth: 100"
+                                    value="{{ request.form.get('nilai_suhu', '') if tab_aktif == 'suhu' else '' }}">
+                            </div>
+                            <div class="row g-3 mb-4">
+                                <div class="col-6">
+                                    <label class="form-label-custom">Dari</label>
+                                    <select class="form-select-custom" name="dari_suhu">
+                                        {% for val, lbl in [('celsius','Celsius (°C)'),('fahrenheit','Fahrenheit (°F)'),('kelvin','Kelvin (K)'),('reamur','Réaumur (°Ré)')] %}
+                                        <option value="{{ val }}" {% if request.form.get('dari_suhu', 'celsius') == val and tab_aktif == 'suhu' %}selected{% endif %}>{{ lbl }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label-custom">Ke</label>
+                                    <select class="form-select-custom" name="ke_suhu">
+                                        {% for val, lbl in [('celsius','Celsius (°C)'),('fahrenheit','Fahrenheit (°F)'),('kelvin','Kelvin (K)'),('reamur','Réaumur (°Ré)')] %}
+                                        <option value="{{ val }}" {% if request.form.get('ke_suhu', 'fahrenheit') == val and tab_aktif == 'suhu' %}selected{% elif val == 'fahrenheit' and tab_aktif != 'suhu' %}selected{% endif %}>{{ lbl }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ── TAB: Mata Uang ── -->
+                        <div class="tab-content-panel" id="panel-mata_uang" {% if tab_aktif != 'mata_uang' %}style="display:none"{% endif %}>
+                            <input type="hidden" name="jenis" value="mata_uang" class="jenis-input">
+                            <div class="mb-3">
+                                <label class="form-label-custom">Jumlah</label>
+                                <input type="number" step="any" class="form-control-custom" name="jumlah_uang"
+                                    placeholder="cth: 1000000"
+                                    value="{{ request.form.get('jumlah_uang', '') if tab_aktif == 'mata_uang' else '' }}">
+                            </div>
+                            <div class="row g-3 mb-2">
+                                <div class="col-6">
+                                    <label class="form-label-custom">Dari</label>
+                                    <select class="form-select-custom" name="dari_uang">
+                                        {% for c in currencies %}
+                                        <option value="{{ c }}" {% if request.form.get('dari_uang', 'IDR') == c and tab_aktif == 'mata_uang' %}selected{% elif c == 'IDR' and tab_aktif != 'mata_uang' %}selected{% endif %}>{{ c }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label-custom">Ke</label>
+                                    <select class="form-select-custom" name="ke_uang">
+                                        {% for c in currencies %}
+                                        <option value="{{ c }}" {% if request.form.get('ke_uang', 'USD') == c and tab_aktif == 'mata_uang' %}selected{% elif c == 'USD' and tab_aktif != 'mata_uang' %}selected{% endif %}>{{ c }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="currency-note mb-4">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Rate statis: 1 USD ≈ IDR 15.873 · 1 EUR ≈ IDR 17.241 · 1 SGD ≈ IDR 11.765
+                            </div>
+                        </div>
+
+                        <!-- ── TAB: Faktorial ── -->
+                        <div class="tab-content-panel" id="panel-faktorial" {% if tab_aktif != 'faktorial' %}style="display:none"{% endif %}>
+                            <input type="hidden" name="jenis" value="faktorial" class="jenis-input">
+                            <div class="mb-4">
+                                <label class="form-label-custom">Nilai n (0 – 20)</label>
+                                <input type="number" min="0" max="20" step="1" class="form-control-custom" name="n_faktorial"
+                                    placeholder="cth: 10"
+                                    value="{{ request.form.get('n_faktorial', '') if tab_aktif == 'faktorial' else '' }}">
+                            </div>
+                        </div>
+
+                        <!-- ── TAB: Fibonacci ── -->
+                        <div class="tab-content-panel" id="panel-fibonacci" {% if tab_aktif != 'fibonacci' %}style="display:none"{% endif %}>
+                            <input type="hidden" name="jenis" value="fibonacci" class="jenis-input">
+                            <div class="mb-4">
+                                <label class="form-label-custom">Suku ke-n (1 – 50)</label>
+                                <input type="number" min="1" max="50" step="1" class="form-control-custom" name="n_fibonacci"
+                                    placeholder="cth: 15"
+                                    value="{{ request.form.get('n_fibonacci', '') if tab_aktif == 'fibonacci' else '' }}">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary-glow w-100 btn-lg" id="transSubmitBtn">
+                            <i class="bi bi-play-fill me-2"></i>Hitung
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Riwayat Transformasi -->
+            <div class="calc-card mt-4">
+                <div class="calc-card-header">
+                    <i class="bi bi-clock-history me-2"></i>Riwayat
+                </div>
+                <div class="calc-card-body p-0">
+                    {% set trans_cats = ['Konversi Basis','Konversi Suhu','Konversi Mata Uang','Faktorial','Fibonacci'] %}
+                    {% set trans_history = history | selectattr('kategori', 'in', trans_cats) | list %}
+                    {% if trans_history %}
+                    <ul class="history-list">
+                        {% for item in trans_history[:8] %}
+                        <li class="history-list-item">
+                            <div>
+                                <span class="badge-mini">{{ item.kategori }}</span>
+                                <span class="history-formula-sm d-block">{{ item.formula }}</span>
+                            </div>
+                            <span class="history-time-sm">{{ item.waktu }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <div class="empty-mini"><i class="bi bi-clock me-2"></i>Belum ada riwayat</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Hasil ── -->
+        <div class="col-lg-7">
+            {% if hasil %}
+                {% if hasil.error %}
+                <div class="result-card result-error animate-in">
+                    <div class="result-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+                    <h3>Error</h3>
+                    <p>{{ hasil.error }}</p>
+                </div>
+                {% else %}
+                <div class="result-card animate-in">
+                    <div class="result-label">Hasil</div>
+                    <div class="result-value">{{ hasil.result }}</div>
+                    <div class="result-formula">
+                        <i class="bi bi-function me-2"></i>{{ hasil.formula }}
+                    </div>
+                    <button class="btn-copy" onclick="copyResult('{{ hasil.result }}')" title="Salin">
+                        <i class="bi bi-clipboard"></i> Salin
+                    </button>
+                </div>
+
+                {% if hasil.deret is defined and hasil.deret %}
+                <div class="steps-card animate-in" style="animation-delay:0.05s">
+                    <div class="steps-header">
+                        <i class="bi bi-bar-chart-steps me-2"></i>Deret Fibonacci
+                    </div>
+                    <div class="fibonacci-grid">
+                        {% for num in hasil.deret %}
+                        <span class="fib-num {% if loop.last %}fib-highlight{% endif %}">{{ num }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="steps-card animate-in" style="animation-delay:0.1s">
+                    <div class="steps-header">
+                        <i class="bi bi-list-ol me-2"></i>Langkah-Langkah
+                    </div>
+                    <div class="steps-body">
+                        {% for step in hasil.steps %}
+                        <div class="step-item" style="animation-delay: {{ loop.index0 * 0.06 }}s">
+                            {% if loop.first %}
+                            <div class="step-num"><i class="bi bi-info-circle-fill"></i></div>
+                            {% else %}
+                            <div class="step-num">{{ loop.index }}</div>
+                            {% endif %}
+                            <div class="step-text font-mono">{{ step }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            {% else %}
+            <div class="placeholder-card">
+                <div class="placeholder-icon">
+                    <i class="bi bi-arrow-left-right"></i>
+                </div>
+                <h3>Siap Mengkonversi</h3>
+                <p>Pilih jenis, isi nilai, lalu klik <strong>Hitung</strong>.</p>
+                <div class="placeholder-ops">
+                    <span>BIN</span><span>OCT</span><span>HEX</span>
+                    <span>°C</span><span>IDR</span><span>n!</span>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('.trans-tab').forEach(tab => {
+    tab.addEventListener('click', function () {
+        const target = this.dataset.tab;
+        document.querySelectorAll('.trans-tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        document.getElementById('tabAktifInput').value = target;
+        document.querySelectorAll('.tab-content-panel').forEach(p => p.style.display = 'none');
+        document.getElementById('panel-' + target).style.display = 'block';
+        document.querySelectorAll('.jenis-input').forEach(inp => inp.disabled = true);
+        document.querySelector('#panel-' + target + ' .jenis-input').disabled = false;
+    });
+});
+
+document.querySelectorAll('.jenis-input').forEach(inp => inp.disabled = true);
+const activePanel = document.getElementById('panel-{{ tab_aktif }}');
+if (activePanel) {
+    const activeJenis = activePanel.querySelector('.jenis-input');
+    if (activeJenis) activeJenis.disabled = false;
+}
+</script>
+{% endblock %}

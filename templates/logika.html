@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% block title %}Logika{% endblock %}
+
+{% block content %}
+<div class="page-hero page-hero-logika">
+    <div class="container-xl">
+        <div class="page-hero-content">
+            <div class="page-badge"><i class="bi bi-diagram-3-fill me-1"></i>Logika</div>
+            <h1 class="page-title">Operator Logika</h1>
+            <p class="page-subtitle">Operasi bitwise AND, OR, NOT, XOR, NAND, NOR — dengan tabel kebenaran.</p>
+        </div>
+    </div>
+</div>
+
+<div class="container-xl py-5">
+    <div class="row g-4">
+        <!-- ── Form ── -->
+        <div class="col-lg-5">
+            <div class="calc-card">
+                <div class="calc-card-header">
+                    <i class="bi bi-diagram-3 me-2"></i>Input
+                </div>
+                <div class="calc-card-body">
+                    <form method="POST" action="{{ url_for('logika') }}" id="logikaForm">
+
+                        <div class="mb-4">
+                            <label class="form-label-custom">Gerbang Logika</label>
+                            <div class="op-grid op-grid-3">
+                                {% set ops = [
+                                    ('and',  'AND',  'Konjungsi'),
+                                    ('or',   'OR',   'Disjungsi'),
+                                    ('not',  'NOT',  'Negasi'),
+                                    ('xor',  'XOR',  'Eksklusif'),
+                                    ('nand', 'NAND', 'NOT AND'),
+                                    ('nor',  'NOR',  'NOT OR'),
+                                ] %}
+                                {% for val, sym, label in ops %}
+                                <label class="op-btn {% if hasil and hasil.operasi == val %}active{% elif not hasil and val == 'and' %}active{% endif %}">
+                                    <input type="radio" name="operasi" value="{{ val }}"
+                                        {% if hasil and hasil.operasi == val %}checked
+                                        {% elif not hasil and val == 'and' %}checked{% endif %}>
+                                    <span class="op-sym op-sym-sm">{{ sym }}</span>
+                                    <span class="op-lbl">{{ label }}</span>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label-custom" for="inputLA">Nilai A <span class="text-muted">(bilangan bulat)</span></label>
+                            <input type="number" step="1" class="form-control-custom" id="inputLA"
+                                name="a" placeholder="cth: 12"
+                                value="{{ hasil.a if hasil and hasil.a is not none else '' }}" required>
+                            <div class="input-hint" id="hintA"></div>
+                        </div>
+
+                        <div class="mb-4" id="inputLBWrap">
+                            <label class="form-label-custom" for="inputLB">Nilai B <span class="text-muted">(bilangan bulat)</span></label>
+                            <input type="number" step="1" class="form-control-custom" id="inputLB"
+                                name="b" placeholder="cth: 10"
+                                value="{{ hasil.b if hasil and hasil.b is not none else '' }}">
+                            <div class="input-hint" id="hintB"></div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary-glow w-100 btn-lg">
+                            <i class="bi bi-play-fill me-2"></i>Hitung
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Riwayat Logika -->
+            <div class="calc-card mt-4">
+                <div class="calc-card-header">
+                    <i class="bi bi-clock-history me-2"></i>Riwayat
+                </div>
+                <div class="calc-card-body p-0">
+                    {% set logic_history = history | selectattr('kategori', 'equalto', 'Logika') | list %}
+                    {% if logic_history %}
+                    <ul class="history-list">
+                        {% for item in logic_history[:8] %}
+                        <li class="history-list-item">
+                            <span class="history-formula-sm">{{ item.formula }}</span>
+                            <span class="history-time-sm">{{ item.waktu }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <div class="empty-mini"><i class="bi bi-clock me-2"></i>Belum ada riwayat</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Hasil ── -->
+        <div class="col-lg-7">
+            {% if hasil %}
+                {% if hasil.error %}
+                <div class="result-card result-error animate-in">
+                    <div class="result-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+                    <h3>Error</h3>
+                    <p>{{ hasil.error }}</p>
+                </div>
+                {% else %}
+                <div class="result-card animate-in">
+                    <div class="result-label">Hasil</div>
+                    <div class="result-value">{{ hasil.result }}</div>
+                    <div class="result-formula">
+                        <i class="bi bi-function me-2"></i>{{ hasil.formula }}
+                    </div>
+                    <button class="btn-copy" onclick="copyResult('{{ hasil.result }}')" title="Salin">
+                        <i class="bi bi-clipboard"></i> Salin
+                    </button>
+                </div>
+
+                <div class="steps-card animate-in" style="animation-delay:0.1s">
+                    <div class="steps-header">
+                        <i class="bi bi-list-ol me-2"></i>Langkah-Langkah
+                    </div>
+                    <div class="steps-body">
+                        {% for step in hasil.steps %}
+                        <div class="step-item" style="animation-delay: {{ loop.index0 * 0.06 }}s">
+                            {% if loop.first %}
+                            <div class="step-num"><i class="bi bi-info-circle-fill"></i></div>
+                            {% else %}
+                            <div class="step-num">{{ loop.index }}</div>
+                            {% endif %}
+                            <div class="step-text font-mono">{{ step }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {% if hasil.truth_table %}
+                <div class="steps-card animate-in" style="animation-delay:0.2s">
+                    <div class="steps-header">
+                        <i class="bi bi-table me-2"></i>Tabel Kebenaran
+                    </div>
+                    <div class="steps-body p-0">
+                        <table class="truth-table">
+                            <thead>
+                                <tr>
+                                    <th>A</th>
+                                    {% if hasil.operasi != 'not' %}<th>B</th>{% endif %}
+                                    <th>{{ hasil.operasi | upper }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in hasil.truth_table %}
+                                <tr class="{% if row.result == 1 %}tt-true{% else %}tt-false{% endif %}">
+                                    <td><span class="bit-badge bit-{{ row.a }}">{{ row.a }}</span></td>
+                                    {% if hasil.operasi != 'not' %}
+                                    <td><span class="bit-badge bit-{{ row.b }}">{{ row.b }}</span></td>
+                                    {% endif %}
+                                    <td><span class="bit-badge bit-{{ row.result }}">{{ row.result }}</span></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endif %}
+                {% endif %}
+            {% else %}
+            <div class="placeholder-card">
+                <div class="placeholder-icon">
+                    <i class="bi bi-diagram-3"></i>
+                </div>
+                <h3>Siap Menghitung</h3>
+                <p>Pilih gerbang, isi nilai integer, lalu klik <strong>Hitung</strong>.</p>
+                <div class="placeholder-ops">
+                    <span>AND</span><span>OR</span><span>NOT</span>
+                    <span>XOR</span><span>NAND</span><span>NOR</span>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toBin(n) {
+    const v = parseInt(n);
+    if (isNaN(v)) return '';
+    return '= ' + (v >>> 0).toString(2).replace(/^0+/, '') || '0';
+}
+
+const inpA = document.getElementById('inputLA');
+const inpB = document.getElementById('inputLB');
+const hintA = document.getElementById('hintA');
+const hintB = document.getElementById('hintB');
+
+inpA.addEventListener('input', () => { hintA.textContent = inpA.value ? 'Biner: ' + toBin(inpA.value) : ''; });
+inpB.addEventListener('input', () => { hintB.textContent = inpB.value ? 'Biner: ' + toBin(inpB.value) : ''; });
+
+document.querySelectorAll('input[name="operasi"]').forEach(radio => {
+    radio.addEventListener('change', function () {
+        const wrap = document.getElementById('inputLBWrap');
+        wrap.style.display = this.value === 'not' ? 'none' : 'block';
+        document.querySelectorAll('.op-btn').forEach(btn => btn.classList.remove('active'));
+        this.closest('.op-btn').classList.add('active');
+    });
+});
+const cur = document.querySelector('input[name="operasi"]:checked');
+if (cur && cur.value === 'not') document.getElementById('inputLBWrap').style.display = 'none';
+
+if (inpA.value) hintA.textContent = 'Biner: ' + toBin(inpA.value);
+if (inpB.value) hintB.textContent = 'Biner: ' + toBin(inpB.value);
+</script>
+{% endblock %}
