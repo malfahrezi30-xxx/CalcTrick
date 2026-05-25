@@ -1,191 +1,83 @@
 {% extends "base.html" %}
-
 {% block title %}Beranda{% endblock %}
 
 {% block content %}
-<!-- ──────────── HERO ──────────── -->
-<section class="hero-section">
-    <div class="hero-bg-shapes">
-        <div class="shape shape-1"></div>
-        <div class="shape shape-2"></div>
-        <div class="shape shape-3"></div>
-    </div>
-    <div class="container-xl">
-        <div class="hero-content text-center">
-            <div class="hero-badge">
-                <i class="bi bi-stars me-1"></i> Kalkulator Pintar
-            </div>
-            <h1 class="hero-title">
-                Hitung <span class="gradient-text">Cepat</span><br>
-                Hasil <span class="gradient-text">Akurat</span>
-            </h1>
-            <p class="hero-subtitle">
-                Aritmatika, logika, dan transformasi bilangan — lengkap dengan langkah penyelesaian.
-            </p>
-            <div class="hero-actions">
-                <a href="{{ url_for('aritmatika') }}" class="btn btn-primary-glow btn-lg">
-                    <i class="bi bi-play-fill me-2"></i>Mulai Hitung
-                </a>
-                <a href="#fitur" class="btn btn-outline-glass btn-lg">
-                    <i class="bi bi-grid-3x3-gap me-2"></i>Lihat Fitur
-                </a>
-            </div>
+<div class="calculator-body home-calculator animate-in">
+    <div class="calc-top-strip"></div>
 
-            <!-- Stats bar -->
-            <div class="hero-stats">
-                <div class="stat-item">
-                    <div class="stat-num">8+</div>
-                    <div class="stat-label">Operasi Aritmatika</div>
-                </div>
-                <div class="stat-divider"></div>
-                <div class="stat-item">
-                    <div class="stat-num">6</div>
-                    <div class="stat-label">Gerbang Logika</div>
-                </div>
-                <div class="stat-divider"></div>
-                <div class="stat-item">
-                    <div class="stat-num">5</div>
-                    <div class="stat-label">Jenis Konversi</div>
-                </div>
-                <div class="stat-divider"></div>
-                <div class="stat-item">
-                    <div class="stat-num">∞</div>
-                    <div class="stat-label">Langkah Detail</div>
-                </div>
+    <!-- Display -->
+    <div class="display-panel">
+        <div class="display-row-top">
+            <span class="display-mode-badge"><i class="bi bi-calculator me-1"></i>CalcTrick v2.0</span>
+            <div class="display-indicator">
+                <span class="active"></span>
+                <span></span>
+                <span></span>
             </div>
         </div>
+        <div class="display-expression">Selamat datang di CalcTrick</div>
+        <div class="display-main home-display-main">0</div>
     </div>
-</section>
 
-<!-- ──────────── FITUR CARDS ──────────── -->
-<section class="features-section" id="fitur">
-    <div class="container-xl">
-        <div class="section-header text-center">
-            <div class="section-badge">Kategori</div>
-            <h2 class="section-title">Pilih Mode</h2>
-            <p class="section-subtitle">Tiga kategori perhitungan dengan penjelasan tiap langkah</p>
-        </div>
-
-        <div class="row g-4 mt-2">
-            <!-- Card Aritmatika -->
-            <div class="col-md-4">
-                <a href="{{ url_for('aritmatika') }}" class="feature-card-link">
-                    <div class="feature-card card-aritmatika">
-                        <div class="card-glow"></div>
-                        <div class="card-icon-wrap">
-                            <i class="bi bi-plus-slash-minus"></i>
-                        </div>
-                        <h3 class="card-title">Aritmatika</h3>
-                        <p class="card-desc">Penjumlahan, pengurangan, perkalian, pembagian, pangkat, akar, modulus, dan floor division.</p>
-                        <div class="card-tags">
-                            <span class="tag">+</span>
-                            <span class="tag">−</span>
-                            <span class="tag">×</span>
-                            <span class="tag">÷</span>
-                            <span class="tag">^</span>
-                            <span class="tag">√</span>
-                            <span class="tag">mod</span>
-                            <span class="tag">//</span>
-                        </div>
-                        <div class="card-action">
-                            Buka <i class="bi bi-arrow-right-circle-fill ms-2"></i>
-                        </div>
-                    </div>
-                </a>
+    <!-- Mode Cards -->
+    <div class="home-mode-grid">
+        <a href="{{ url_for('aritmatika') }}" class="mode-card mode-arith">
+            <div class="mode-icon">
+                <i class="bi bi-plus-slash-minus"></i>
             </div>
-
-            <!-- Card Logika -->
-            <div class="col-md-4">
-                <a href="{{ url_for('logika') }}" class="feature-card-link">
-                    <div class="feature-card card-logika">
-                        <div class="card-glow"></div>
-                        <div class="card-icon-wrap">
-                            <i class="bi bi-diagram-3-fill"></i>
-                        </div>
-                        <h3 class="card-title">Logika</h3>
-                        <p class="card-desc">Operasi bitwise dengan representasi biner dan tabel kebenaran visual.</p>
-                        <div class="card-tags">
-                            <span class="tag">AND</span>
-                            <span class="tag">OR</span>
-                            <span class="tag">NOT</span>
-                            <span class="tag">XOR</span>
-                            <span class="tag">NAND</span>
-                            <span class="tag">NOR</span>
-                        </div>
-                        <div class="card-action">
-                            Buka <i class="bi bi-arrow-right-circle-fill ms-2"></i>
-                        </div>
-                    </div>
-                </a>
+            <div class="mode-label">Aritmatika</div>
+            <div class="mode-desc">+  −  ×  ÷  ^  √  mod  //</div>
+        </a>
+        <a href="{{ url_for('logika') }}" class="mode-card mode-logic">
+            <div class="mode-icon">
+                <i class="bi bi-diagram-3-fill"></i>
             </div>
-
-            <!-- Card Transformasi -->
-            <div class="col-md-4">
-                <a href="{{ url_for('transformasi') }}" class="feature-card-link">
-                    <div class="feature-card card-transformasi">
-                        <div class="card-glow"></div>
-                        <div class="card-icon-wrap">
-                            <i class="bi bi-arrow-left-right"></i>
-                        </div>
-                        <h3 class="card-title">Transformasi</h3>
-                        <p class="card-desc">Konversi basis, suhu, mata uang, faktorial, dan deret Fibonacci.</p>
-                        <div class="card-tags">
-                            <span class="tag">Basis</span>
-                            <span class="tag">Suhu</span>
-                            <span class="tag">Kurs</span>
-                            <span class="tag">n!</span>
-                            <span class="tag">Fib</span>
-                        </div>
-                        <div class="card-action">
-                            Buka <i class="bi bi-arrow-right-circle-fill ms-2"></i>
-                        </div>
-                    </div>
-                </a>
+            <div class="mode-label">Logika</div>
+            <div class="mode-desc">AND  OR  NOT  XOR  NAND  NOR</div>
+        </a>
+        <a href="{{ url_for('transformasi') }}" class="mode-card mode-trans">
+            <div class="mode-icon">
+                <i class="bi bi-arrow-left-right"></i>
             </div>
-        </div>
+            <div class="mode-label">Transformasi</div>
+            <div class="mode-desc">Basis  Suhu  Kurs  n!  Fib</div>
+        </a>
     </div>
-</section>
 
-<!-- ──────────── HISTORY GLOBAL ──────────── -->
-<section class="history-section">
-    <div class="container-xl">
-        <div class="section-header d-flex align-items-center justify-content-between flex-wrap gap-3">
-            <div>
-                <div class="section-badge">Riwayat</div>
-                <h2 class="section-title mb-0">Perhitungan Terakhir</h2>
-            </div>
+    <!-- History -->
+    <div class="history-section">
+        <div class="history-section-header">
+            <span class="history-section-title">
+                <i class="bi bi-clock-history"></i> Riwayat Terakhir
+            </span>
             {% if history %}
-            <button class="btn btn-danger-glass" id="clearHistoryBtn">
-                <i class="bi bi-trash3-fill me-2"></i>Hapus Semua
+            <button class="btn-clear-hist" id="clearHistoryBtn">
+                <i class="bi bi-trash3"></i> Hapus
             </button>
             {% endif %}
         </div>
 
         {% if history %}
-        <div class="history-grid mt-4">
-            {% for item in history %}
-            <div class="history-item animate-in" style="animation-delay: {{ loop.index0 * 0.05 }}s">
-                <div class="history-badge-cat badge-{{ item.kategori | lower | replace(' ', '-') }}">
-                    {% if 'Aritmatika' in item.kategori %}<i class="bi bi-plus-slash-minus me-1"></i>
-                    {% elif 'Logika' in item.kategori %}<i class="bi bi-diagram-3 me-1"></i>
-                    {% else %}<i class="bi bi-arrow-left-right me-1"></i>{% endif %}
-                    {{ item.kategori }}
+        <div class="history-global-grid">
+            {% for item in history[:6] %}
+            <div class="history-global-item animate-in" style="animation-delay:{{ loop.index0 * 0.05 }}s">
+                <div class="hgi-formula">{{ item.formula }}</div>
+                <div class="hgi-result">= {{ item.result }}</div>
+                <div class="hgi-meta">
+                    <span class="history-row-cat {% if 'Aritmatika' in item.kategori %}cat-aritmatika{% elif 'Logika' in item.kategori %}cat-logika{% else %}cat-trans{% endif %}">
+                        {{ item.kategori }}
+                    </span>
+                    <span class="hgi-time">{{ item.waktu }}</span>
                 </div>
-                <div class="history-formula">{{ item.formula }}</div>
-                <div class="history-result">= {{ item.result }}</div>
-                <div class="history-time"><i class="bi bi-clock me-1"></i>{{ item.waktu }}</div>
             </div>
             {% endfor %}
         </div>
         {% else %}
-        <div class="empty-history">
-            <div class="empty-icon"><i class="bi bi-clock-history"></i></div>
-            <p>Belum ada riwayat.</p>
-            <a href="{{ url_for('aritmatika') }}" class="btn btn-primary-glow">
-                <i class="bi bi-play-fill me-2"></i>Mulai Hitung
-            </a>
+        <div class="history-empty-mini">
+            <i class="bi bi-clock" style="opacity:0.2; font-size:1.5rem; display:block; margin-bottom:6px;"></i>
+            Belum ada riwayat — mulai menghitung!
         </div>
         {% endif %}
     </div>
-</section>
+</div>
 {% endblock %}

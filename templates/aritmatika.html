@@ -2,154 +2,159 @@
 {% block title %}Aritmatika{% endblock %}
 
 {% block content %}
-<div class="page-hero page-hero-aritmatika">
-    <div class="container-xl">
-        <div class="page-hero-content">
-            <div class="page-badge"><i class="bi bi-plus-slash-minus me-1"></i>Aritmatika</div>
-            <h1 class="page-title">Operasi Aritmatika</h1>
-            <p class="page-subtitle">Hitung dua bilangan dengan 8 jenis operasi, lengkap dengan langkah penyelesaian.</p>
+<div class="calculator-body animate-in">
+    <div class="calc-top-strip"></div>
+
+    <!-- Display -->
+    <div class="display-panel">
+        <div class="display-row-top">
+            <span class="display-mode-badge"><i class="bi bi-plus-slash-minus me-1"></i>ARITMATIKA</span>
+            <div class="display-indicator">
+                <span class="active"></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="display-expression" id="displayExpr">
+            {% if hasil and not hasil.error %}{{ hasil.formula }}{% else %}Masukkan nilai dan pilih operasi{% endif %}
+        </div>
+        <div class="display-main {% if hasil and hasil.error %}display-error{% endif %}" id="displayMain">
+            {% if hasil %}
+                {% if hasil.error %}ERR{% else %}{{ hasil.result }}{% endif %}
+            {% else %}0{% endif %}
         </div>
     </div>
-</div>
 
-<div class="container-xl py-5">
-    <div class="row g-4">
-        <!-- ── Form Kalkulasi ── -->
-        <div class="col-lg-5">
-            <div class="calc-card">
-                <div class="calc-card-header">
-                    <i class="bi bi-calculator me-2"></i>Input
+    <!-- Two Columns -->
+    <div class="calc-columns">
+
+        <!-- LEFT: Keypad / Form -->
+        <div class="calc-keypad">
+            <form method="POST" action="{{ url_for('aritmatika') }}" id="aritmatikaForm">
+
+                <!-- Operation Buttons -->
+                <div class="keypad-section-label"><i class="bi bi-grid-3x3-gap me-1"></i>Operasi</div>
+                <div class="btn-grid btn-grid-4" style="margin-bottom:10px;">
+                    {% set ops = [
+                        ('tambah',   '+',   'Tambah'),
+                        ('kurang',   '−',   'Kurang'),
+                        ('kali',     '×',   'Kali'),
+                        ('bagi',     '÷',   'Bagi'),
+                        ('pangkat',  '^',   'Pangkat'),
+                        ('akar',     '√',   'Akar'),
+                        ('modulus',  'mod', 'Modulus'),
+                        ('floor_div','//','Floor'),
+                    ] %}
+                    {% for val, sym, label in ops %}
+                    <label class="calc-btn btn-op {% if hasil and hasil.operasi == val %}selected{% elif not hasil and val == 'tambah' %}selected{% endif %}" id="op-{{ val }}">
+                        <input type="radio" name="operasi" value="{{ val }}" style="display:none"
+                            {% if hasil and hasil.operasi == val %}checked
+                            {% elif not hasil and val == 'tambah' %}checked{% endif %}>
+                        <span>{{ sym }}</span>
+                        <span class="btn-sub">{{ label }}</span>
+                    </label>
+                    {% endfor %}
                 </div>
-                <div class="calc-card-body">
-                    <form method="POST" action="{{ url_for('aritmatika') }}" id="aritmatikaForm">
 
-                        <!-- Pilih Operasi -->
-                        <div class="mb-4">
-                            <label class="form-label-custom">Pilih Operasi</label>
-                            <div class="op-grid">
-                                {% set ops = [
-                                    ('tambah', '+', 'Tambah'),
-                                    ('kurang', '−', 'Kurang'),
-                                    ('kali', '×', 'Kali'),
-                                    ('bagi', '÷', 'Bagi'),
-                                    ('pangkat', '^', 'Pangkat'),
-                                    ('akar', '√', 'Akar'),
-                                    ('modulus', 'mod', 'Modulus'),
-                                    ('floor_div', '//', 'Floor'),
-                                ] %}
-                                {% for val, sym, label in ops %}
-                                <label class="op-btn {% if hasil and hasil.operasi == val %}active{% elif not hasil and val == 'tambah' %}active{% endif %}">
-                                    <input type="radio" name="operasi" value="{{ val }}"
-                                        {% if hasil and hasil.operasi == val %}checked
-                                        {% elif not hasil and val == 'tambah' %}checked{% endif %}>
-                                    <span class="op-sym">{{ sym }}</span>
-                                    <span class="op-lbl">{{ label }}</span>
-                                </label>
-                                {% endfor %}
-                            </div>
-                        </div>
-
-                        <!-- Input A -->
-                        <div class="mb-3">
-                            <label class="form-label-custom" for="inputA">Nilai A</label>
-                            <input type="number" step="any" class="form-control-custom" id="inputA"
-                                name="a" placeholder="Angka pertama"
-                                value="{{ hasil.a if hasil and hasil.a is not none else '' }}" required>
-                        </div>
-
-                        <!-- Input B -->
-                        <div class="mb-4" id="inputBWrap">
-                            <label class="form-label-custom" for="inputB">Nilai B</label>
-                            <input type="number" step="any" class="form-control-custom" id="inputB"
-                                name="b" placeholder="Angka kedua"
-                                value="{{ hasil.b if hasil and hasil.b is not none else '' }}">
-                        </div>
-
-                        <button type="submit" class="btn btn-primary-glow w-100 btn-lg">
-                            <i class="bi bi-play-fill me-2"></i>Hitung
-                        </button>
-                    </form>
+                <!-- Input A -->
+                <div class="keypad-section-label">Nilai A</div>
+                <div class="calc-input-group">
+                    <input type="number" step="any" class="calc-input" id="inputA"
+                        name="a" placeholder="0"
+                        value="{{ hasil.a if hasil and hasil.a is not none else '' }}" required>
                 </div>
-            </div>
 
-            <!-- Riwayat Aritmatika -->
-            <div class="calc-card mt-4">
-                <div class="calc-card-header">
-                    <i class="bi bi-clock-history me-2"></i>Riwayat
-                    <span class="badge-count ms-auto">{{ history | selectattr('kategori', 'equalto', 'Aritmatika') | list | length }}</span>
-                </div>
-                <div class="calc-card-body p-0">
-                    {% set arith_history = history | selectattr('kategori', 'equalto', 'Aritmatika') | list %}
-                    {% if arith_history %}
-                    <ul class="history-list">
-                        {% for item in arith_history[:8] %}
-                        <li class="history-list-item">
-                            <span class="history-formula-sm">{{ item.formula }}</span>
-                            <span class="history-time-sm">{{ item.waktu }}</span>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                    {% else %}
-                    <div class="empty-mini">
-                        <i class="bi bi-clock me-2"></i>Belum ada riwayat
+                <!-- Input B -->
+                <div id="inputBWrap">
+                    <div class="keypad-section-label">Nilai B</div>
+                    <div class="calc-input-group">
+                        <input type="number" step="any" class="calc-input" id="inputB"
+                            name="b" placeholder="0"
+                            value="{{ hasil.b if hasil and hasil.b is not none else '' }}">
                     </div>
-                    {% endif %}
                 </div>
-            </div>
+
+                <!-- Number quick buttons -->
+                <div class="keypad-section-label">Input Cepat</div>
+                <div class="btn-grid btn-grid-4" style="margin-bottom:8px;">
+                    {% for n in [7,8,9,'C',4,5,6,'←',1,2,3,'±',0,'.','00','↵'] %}
+                    <button type="button" class="calc-btn
+                        {% if n == 'C' %}btn-clear
+                        {% elif n == '↵' %}btn-eq
+                        {% elif n in ['←','±'] %}btn-fn
+                        {% endif %}"
+                        onclick="quickInput('{{ n }}')">{{ n }}</button>
+                    {% endfor %}
+                </div>
+
+                <!-- Submit hidden trigger -->
+                <button type="submit" id="calcSubmitBtn" style="display:none"></button>
+            </form>
         </div>
 
-        <!-- ── Hasil ── -->
-        <div class="col-lg-7">
-            {% if hasil %}
-                {% if hasil.error %}
-                <div class="result-card result-error animate-in">
-                    <div class="result-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
-                    <h3>Error</h3>
-                    <p>{{ hasil.error }}</p>
-                </div>
-                {% else %}
-                <div class="result-card animate-in">
-                    <div class="result-label">Hasil</div>
-                    <div class="result-value" id="resultValue">{{ hasil.result }}</div>
-                    <div class="result-formula">
-                        <i class="bi bi-function me-2"></i>{{ hasil.formula }}
+        <!-- RIGHT: Result -->
+        <div class="calc-result-area">
+            <div class="result-panel">
+                {% if hasil %}
+                    {% if hasil.error %}
+                    <div class="result-display result-display-error animate-in">
+                        <div class="result-display-label"><i class="bi bi-exclamation-triangle-fill"></i> Error</div>
+                        <div class="result-display-value">{{ hasil.error }}</div>
                     </div>
-                    <button class="btn-copy" onclick="copyResult('{{ hasil.result }}')" title="Salin">
-                        <i class="bi bi-clipboard"></i> Salin
-                    </button>
-                </div>
+                    {% else %}
+                    <div class="result-display animate-in">
+                        <div class="result-display-label">Hasil</div>
+                        <div class="result-display-value" id="resultValue">{{ hasil.result }}</div>
+                        <div class="result-display-formula">{{ hasil.formula }}</div>
+                        <button class="btn-copy-result" onclick="copyResult('{{ hasil.result }}')">
+                            <i class="bi bi-clipboard"></i> Salin
+                        </button>
+                    </div>
 
-                <div class="steps-card animate-in" style="animation-delay:0.1s">
-                    <div class="steps-header">
-                        <i class="bi bi-list-ol me-2"></i>Langkah-Langkah
+                    <!-- Steps -->
+                    <div class="steps-panel animate-in" style="animation-delay:0.1s">
+                        <div class="steps-panel-header">
+                            <i class="bi bi-list-ol"></i> Langkah-Langkah
+                        </div>
+                        <div class="steps-panel-body">
+                            {% for step in hasil.steps %}
+                            <div class="step-row" style="animation-delay:{{ loop.index0 * 0.05 }}s">
+                                <div class="step-num">
+                                    {% if loop.first %}<i class="bi bi-info-circle-fill" style="font-size:0.6rem"></i>
+                                    {% else %}{{ loop.index }}{% endif %}
+                                </div>
+                                <div class="step-text">{{ step }}</div>
+                            </div>
+                            {% endfor %}
+                        </div>
                     </div>
-                    <div class="steps-body">
-                        {% for step in hasil.steps %}
-                        <div class="step-item" style="animation-delay: {{ loop.index0 * 0.06 }}s">
-                            {% if loop.first %}
-                            <div class="step-num"><i class="bi bi-info-circle-fill"></i></div>
-                            {% else %}
-                            <div class="step-num">{{ loop.index }}</div>
-                            {% endif %}
-                            <div class="step-text font-mono">{{ step }}</div>
+                    {% endif %}
+                {% else %}
+                <div class="result-placeholder animate-fade">
+                    <i class="bi bi-calculator"></i>
+                    <p>Pilih operasi, isi nilai A &amp; B, lalu tekan <strong style="color:#a78bfa">↵</strong></p>
+                </div>
+                {% endif %}
+
+                <!-- History mini -->
+                {% set arith_hist = history | selectattr('kategori','equalto','Aritmatika') | list %}
+                {% if arith_hist %}
+                <div class="steps-panel" style="margin-top:0">
+                    <div class="steps-panel-header">
+                        <i class="bi bi-clock-history"></i> Riwayat
+                        <span style="margin-left:auto; background:rgba(92,53,212,0.25); color:#a78bfa; border-radius:6px; padding:1px 7px; font-size:0.65rem;">
+                            {{ arith_hist | length }}
+                        </span>
+                    </div>
+                    <div class="steps-panel-body" style="padding:6px 8px; max-height:160px;">
+                        {% for item in arith_hist[:8] %}
+                        <div class="history-row" style="margin-bottom:4px">
+                            <span class="history-row-formula">{{ item.formula }}</span>
+                            <span class="history-row-result">{{ item.result }}</span>
                         </div>
                         {% endfor %}
                     </div>
                 </div>
                 {% endif %}
-            {% else %}
-            <div class="placeholder-card">
-                <div class="placeholder-icon">
-                    <i class="bi bi-calculator"></i>
-                </div>
-                <h3>Siap Menghitung</h3>
-                <p>Pilih operasi, isi nilai, lalu klik <strong>Hitung</strong>.</p>
-                <div class="placeholder-ops">
-                    <span>+</span><span>−</span><span>×</span><span>÷</span>
-                    <span>^</span><span>√</span><span>mod</span><span>//</span>
-                </div>
             </div>
-            {% endif %}
         </div>
     </div>
 </div>
@@ -157,18 +162,44 @@
 
 {% block extra_js %}
 <script>
+// Operation select
 document.querySelectorAll('input[name="operasi"]').forEach(radio => {
     radio.addEventListener('change', function () {
         const wrap = document.getElementById('inputBWrap');
         wrap.style.display = this.value === 'akar' ? 'none' : 'block';
         document.getElementById('inputB').required = this.value !== 'akar';
-        document.querySelectorAll('.op-btn').forEach(btn => btn.classList.remove('active'));
-        this.closest('.op-btn').classList.add('active');
+        document.querySelectorAll('.btn-op').forEach(b => b.classList.remove('selected'));
+        this.closest('.calc-btn').classList.add('selected');
     });
 });
-const current = document.querySelector('input[name="operasi"]:checked');
-if (current && current.value === 'akar') {
-    document.getElementById('inputBWrap').style.display = 'none';
+
+// Quick input for number pad
+const focusTarget = () => {
+    const a = document.getElementById('inputA');
+    const b = document.getElementById('inputB');
+    return (document.activeElement === b) ? b : a;
+};
+
+function quickInput(val) {
+    const inp = focusTarget();
+    if (val === 'C') {
+        document.getElementById('inputA').value = '';
+        document.getElementById('inputB').value = '';
+    } else if (val === '←') {
+        inp.value = inp.value.slice(0, -1);
+    } else if (val === '±') {
+        if (inp.value) inp.value = (parseFloat(inp.value) * -1).toString();
+    } else if (val === '↵') {
+        document.getElementById('calcSubmitBtn').click();
+    } else if (val === '.') {
+        if (!inp.value.includes('.')) inp.value += '.';
+    } else {
+        inp.value += val;
+    }
 }
+
+// Init state
+const cur = document.querySelector('input[name="operasi"]:checked');
+if (cur && cur.value === 'akar') document.getElementById('inputBWrap').style.display = 'none';
 </script>
 {% endblock %}

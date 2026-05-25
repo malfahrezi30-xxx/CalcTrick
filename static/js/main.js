@@ -1,57 +1,9 @@
 /* ════════════════════════════════════════════════
-   CalcPro – main.js
-   Dark/Light Mode · History · Copy · Animations
+   CalcTrick – main.js
+   Calculator App Edition
    ════════════════════════════════════════════════ */
 
 document.addEventListener('DOMContentLoaded', function () {
-
-    // ──────────────────────────────────────────────
-    //  DARK / LIGHT MODE
-    // ──────────────────────────────────────────────
-    const html        = document.documentElement;
-    const themeToggle = document.getElementById('themeToggle');
-    const themeIcon   = document.getElementById('themeIcon');
-
-    const THEME_KEY = 'calcpro-theme';
-
-    function applyTheme(theme) {
-        html.setAttribute('data-theme', theme);
-        if (themeIcon) {
-            themeIcon.className = theme === 'dark'
-                ? 'bi bi-moon-stars-fill'
-                : 'bi bi-sun-fill';
-        }
-        localStorage.setItem(THEME_KEY, theme);
-    }
-
-    // Load saved theme or default to dark
-    const savedTheme = localStorage.getItem(THEME_KEY) || 'dark';
-    applyTheme(savedTheme);
-
-    if (themeToggle) {
-        themeToggle.addEventListener('click', function () {
-            const current = html.getAttribute('data-theme');
-            applyTheme(current === 'dark' ? 'light' : 'dark');
-
-            // Ripple animation
-            this.style.transform = 'rotate(360deg) scale(1.2)';
-            setTimeout(() => { this.style.transform = ''; }, 350);
-        });
-    }
-
-    // ──────────────────────────────────────────────
-    //  NAVBAR SCROLL EFFECT
-    // ──────────────────────────────────────────────
-    const navbar = document.getElementById('mainNavbar');
-    if (navbar) {
-        window.addEventListener('scroll', function () {
-            if (window.scrollY > 10) {
-                navbar.style.boxShadow = '0 4px 24px rgba(0,0,0,0.3)';
-            } else {
-                navbar.style.boxShadow = 'none';
-            }
-        });
-    }
 
     // ──────────────────────────────────────────────
     //  CLEAR HISTORY
@@ -60,17 +12,15 @@ document.addEventListener('DOMContentLoaded', function () {
     if (clearBtn) {
         clearBtn.addEventListener('click', function () {
             if (!confirm('Hapus semua riwayat perhitungan?')) return;
-
             fetch('/clear_history', { method: 'POST' })
                 .then(res => res.json())
                 .then(() => {
-                    // Fade out history items
-                    document.querySelectorAll('.history-item').forEach((el, i) => {
+                    document.querySelectorAll('.history-global-item, .history-row').forEach((el, i) => {
                         setTimeout(() => {
                             el.style.opacity = '0';
-                            el.style.transform = 'translateY(-10px)';
-                            el.style.transition = 'all 0.3s ease';
-                        }, i * 50);
+                            el.style.transform = 'translateY(-8px)';
+                            el.style.transition = 'all 0.25s ease';
+                        }, i * 40);
                     });
                     setTimeout(() => location.reload(), 400);
                 })
@@ -79,140 +29,138 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ──────────────────────────────────────────────
-    //  ANIMATE ON SCROLL (Intersection Observer)
-    // ──────────────────────────────────────────────
-    const observer = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
-                observer.unobserve(entry.target);
-            }
-        });
-    }, { threshold: 0.1 });
-
-    document.querySelectorAll('.feature-card, .history-item, .stat-item').forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(20px)';
-        el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-        observer.observe(el);
-    });
-
-    // ──────────────────────────────────────────────
     //  FORM SUBMIT LOADING STATE
     // ──────────────────────────────────────────────
     document.querySelectorAll('form').forEach(form => {
         form.addEventListener('submit', function () {
-            const btn = this.querySelector('[type="submit"]');
+            const btn = this.querySelector('[type="submit"]:not([style*="display:none"])');
             if (btn) {
-                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Menghitung...';
+                btn.innerHTML = '<span style="display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;margin-right:8px;"></span>Menghitung...';
                 btn.disabled = true;
             }
         });
     });
 
     // ──────────────────────────────────────────────
-    //  STEP ITEMS STAGGER ANIMATION
+    //  RESULT POP-IN ANIMATION
     // ──────────────────────────────────────────────
-    document.querySelectorAll('.step-item').forEach((item, i) => {
-        item.style.opacity = '0';
-        item.style.transform = 'translateX(-12px)';
+    document.querySelectorAll('.result-display').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'scale(0.95) translateY(8px)';
+        el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
         setTimeout(() => {
-            item.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+            el.style.opacity = '1';
+            el.style.transform = 'scale(1) translateY(0)';
+        }, 60);
+    });
+
+    // ──────────────────────────────────────────────
+    //  STEPS STAGGER ANIMATION
+    // ──────────────────────────────────────────────
+    document.querySelectorAll('.step-row').forEach((item, i) => {
+        item.style.opacity = '0';
+        item.style.transform = 'translateX(-10px)';
+        setTimeout(() => {
+            item.style.transition = 'opacity 0.35s ease, transform 0.35s ease';
             item.style.opacity = '1';
             item.style.transform = 'translateX(0)';
-        }, 100 + i * 60);
+        }, 80 + i * 50);
     });
 
     // ──────────────────────────────────────────────
-    //  RESULT CARD POP-IN
-    // ──────────────────────────────────────────────
-    document.querySelectorAll('.result-card').forEach(card => {
-        card.style.opacity = '0';
-        card.style.transform = 'scale(0.96) translateY(10px)';
-        card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-        setTimeout(() => {
-            card.style.opacity = '1';
-            card.style.transform = 'scale(1) translateY(0)';
-        }, 50);
-    });
-
-    // ──────────────────────────────────────────────
-    //  FIBONACCI NUMBER STAGGER
+    //  FIB NUMBERS STAGGER
     // ──────────────────────────────────────────────
     document.querySelectorAll('.fib-num').forEach((num, i) => {
         num.style.opacity = '0';
-        num.style.transform = 'scale(0.7)';
-        num.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        num.style.transform = 'scale(0.6)';
+        num.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
         setTimeout(() => {
             num.style.opacity = '1';
             num.style.transform = 'scale(1)';
-        }, 30 * i);
+        }, 20 * i);
     });
 
     // ──────────────────────────────────────────────
-    //  NUMBER INPUT: prevent non-numeric for integer fields
+    //  BUTTON PRESS RIPPLE
     // ──────────────────────────────────────────────
-    document.querySelectorAll('input[step="1"]').forEach(input => {
-        input.addEventListener('input', function () {
-            this.value = this.value.replace(/[^0-9-]/g, '');
+    document.querySelectorAll('.calc-btn').forEach(btn => {
+        btn.addEventListener('mousedown', function (e) {
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            ripple.style.cssText = `
+                position:absolute;
+                width:${size}px; height:${size}px;
+                left:${e.clientX - rect.left - size/2}px;
+                top:${e.clientY - rect.top - size/2}px;
+                background:rgba(255,255,255,0.1);
+                border-radius:50%;
+                transform:scale(0);
+                animation:rippleAnim 0.4s ease-out forwards;
+                pointer-events:none;
+            `;
+            this.style.position = 'relative';
+            this.style.overflow = 'hidden';
+            this.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 400);
         });
     });
 
     // ──────────────────────────────────────────────
-    //  AUTO-DISMISS COPY SUCCESS
+    //  DISPLAY COUNTER ANIMATION (home page)
     // ──────────────────────────────────────────────
-    // Handled in copyResult() global function below
+    const homeDisplay = document.querySelector('.home-display-main');
+    if (homeDisplay) {
+        const digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '∞', '?'];
+        let idx = 0;
+        setInterval(() => {
+            homeDisplay.textContent = digits[idx % digits.length];
+            idx++;
+        }, 800);
+    }
+
+    // Inject spin keyframe if not present
+    if (!document.getElementById('calcKeyframes')) {
+        const style = document.createElement('style');
+        style.id = 'calcKeyframes';
+        style.textContent = `
+            @keyframes spin { to { transform: rotate(360deg); } }
+            @keyframes rippleAnim { to { transform: scale(2.5); opacity: 0; } }
+        `;
+        document.head.appendChild(style);
+    }
 
 });
 
-// ──────────────────────────────────────────────────
-//  COPY TO CLIPBOARD (global function)
-// ──────────────────────────────────────────────────
+// ──────────────────────────────────────────────
+//  COPY TO CLIPBOARD
+// ──────────────────────────────────────────────
 function copyResult(value) {
-    if (!navigator.clipboard) {
-        // Fallback
+    const text = String(value);
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(text)
+            .then(() => showCopyToast('✓ Hasil disalin!'))
+            .catch(() => showCopyToast('Gagal menyalin.'));
+    } else {
         const ta = document.createElement('textarea');
-        ta.value = value;
+        ta.value = text;
         document.body.appendChild(ta);
         ta.select();
         document.execCommand('copy');
         document.body.removeChild(ta);
-        showCopyToast('Hasil disalin!');
-        return;
+        showCopyToast('✓ Hasil disalin!');
     }
-    navigator.clipboard.writeText(String(value)).then(() => {
-        showCopyToast('Hasil disalin! ✓');
-    }).catch(() => {
-        showCopyToast('Gagal menyalin.');
-    });
 }
 
 function showCopyToast(msg) {
-    // Remove existing toast
     const old = document.getElementById('copyToast');
     if (old) old.remove();
 
     const toast = document.createElement('div');
     toast.id = 'copyToast';
     toast.textContent = msg;
-    toast.style.cssText = `
-        position: fixed;
-        bottom: 30px;
-        right: 30px;
-        background: linear-gradient(135deg, #d4af37, #f5e6a3, #b8962e);
-        color: #0a0a0a;
-        padding: 12px 24px;
-        border-radius: 12px;
-        font-family: 'Inter', sans-serif;
-        font-weight: 700;
-        font-size: 0.9rem;
-        box-shadow: 0 8px 32px rgba(212,175,55,0.45);
-        z-index: 9999;
-        animation: fadeInUp 0.3s ease;
-        transition: opacity 0.3s ease;
-    `;
     document.body.appendChild(toast);
+
     setTimeout(() => {
         toast.style.opacity = '0';
         setTimeout(() => toast.remove(), 300);

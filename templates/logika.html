@@ -2,178 +2,192 @@
 {% block title %}Logika{% endblock %}
 
 {% block content %}
-<div class="page-hero page-hero-logika">
-    <div class="container-xl">
-        <div class="page-hero-content">
-            <div class="page-badge"><i class="bi bi-diagram-3-fill me-1"></i>Logika</div>
-            <h1 class="page-title">Operator Logika</h1>
-            <p class="page-subtitle">Operasi bitwise AND, OR, NOT, XOR, NAND, NOR — dengan tabel kebenaran.</p>
+<div class="calculator-body animate-in">
+    <div class="calc-top-strip"></div>
+
+    <!-- Display -->
+    <div class="display-panel">
+        <div class="display-row-top">
+            <span class="display-mode-badge"><i class="bi bi-diagram-3-fill me-1"></i>LOGIKA</span>
+            <div class="display-indicator">
+                <span></span><span class="active"></span><span></span>
+            </div>
+        </div>
+        <div class="display-expression">
+            {% if hasil and not hasil.error %}{{ hasil.formula }}{% else %}Masukkan bilangan bulat dan pilih gerbang{% endif %}
+        </div>
+        <div class="display-main {% if hasil and hasil.error %}display-error{% endif %}">
+            {% if hasil %}
+                {% if hasil.error %}ERR{% else %}{{ hasil.result }}{% endif %}
+            {% else %}0{% endif %}
         </div>
     </div>
-</div>
 
-<div class="container-xl py-5">
-    <div class="row g-4">
-        <!-- ── Form ── -->
-        <div class="col-lg-5">
-            <div class="calc-card">
-                <div class="calc-card-header">
-                    <i class="bi bi-diagram-3 me-2"></i>Input
+    <!-- Two Columns -->
+    <div class="calc-columns">
+
+        <!-- LEFT: Form -->
+        <div class="calc-keypad">
+            <form method="POST" action="{{ url_for('logika') }}" id="logikaForm">
+
+                <!-- Gate Selector -->
+                <div class="keypad-section-label"><i class="bi bi-diagram-3 me-1"></i>Gerbang Logika</div>
+                <div class="btn-grid btn-grid-3" style="margin-bottom:10px;">
+                    {% set ops = [
+                        ('and',  'AND',  'Konjungsi'),
+                        ('or',   'OR',   'Disjungsi'),
+                        ('not',  'NOT',  'Negasi'),
+                        ('xor',  'XOR',  'Eksklusif'),
+                        ('nand', 'NAND', 'NOT AND'),
+                        ('nor',  'NOR',  'NOT OR'),
+                    ] %}
+                    {% for val, sym, label in ops %}
+                    <label class="calc-btn btn-fn {% if hasil and hasil.operasi == val %}selected{% elif not hasil and val == 'and' %}selected{% endif %}"
+                           style="{% if hasil and hasil.operasi == val or (not hasil and val == 'and') %}background:rgba(96,165,250,0.15);border-color:rgba(96,165,250,0.35);{% endif %}">
+                        <input type="radio" name="operasi" value="{{ val }}" style="display:none"
+                            {% if hasil and hasil.operasi == val %}checked
+                            {% elif not hasil and val == 'and' %}checked{% endif %}>
+                        <span style="font-size:0.85rem; font-weight:700;">{{ sym }}</span>
+                        <span class="btn-sub">{{ label }}</span>
+                    </label>
+                    {% endfor %}
                 </div>
-                <div class="calc-card-body">
-                    <form method="POST" action="{{ url_for('logika') }}" id="logikaForm">
 
-                        <div class="mb-4">
-                            <label class="form-label-custom">Gerbang Logika</label>
-                            <div class="op-grid op-grid-3">
-                                {% set ops = [
-                                    ('and',  'AND',  'Konjungsi'),
-                                    ('or',   'OR',   'Disjungsi'),
-                                    ('not',  'NOT',  'Negasi'),
-                                    ('xor',  'XOR',  'Eksklusif'),
-                                    ('nand', 'NAND', 'NOT AND'),
-                                    ('nor',  'NOR',  'NOT OR'),
-                                ] %}
-                                {% for val, sym, label in ops %}
-                                <label class="op-btn {% if hasil and hasil.operasi == val %}active{% elif not hasil and val == 'and' %}active{% endif %}">
-                                    <input type="radio" name="operasi" value="{{ val }}"
-                                        {% if hasil and hasil.operasi == val %}checked
-                                        {% elif not hasil and val == 'and' %}checked{% endif %}>
-                                    <span class="op-sym op-sym-sm">{{ sym }}</span>
-                                    <span class="op-lbl">{{ label }}</span>
-                                </label>
-                                {% endfor %}
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label-custom" for="inputLA">Nilai A <span class="text-muted">(bilangan bulat)</span></label>
-                            <input type="number" step="1" class="form-control-custom" id="inputLA"
-                                name="a" placeholder="cth: 12"
-                                value="{{ hasil.a if hasil and hasil.a is not none else '' }}" required>
-                            <div class="input-hint" id="hintA"></div>
-                        </div>
-
-                        <div class="mb-4" id="inputLBWrap">
-                            <label class="form-label-custom" for="inputLB">Nilai B <span class="text-muted">(bilangan bulat)</span></label>
-                            <input type="number" step="1" class="form-control-custom" id="inputLB"
-                                name="b" placeholder="cth: 10"
-                                value="{{ hasil.b if hasil and hasil.b is not none else '' }}">
-                            <div class="input-hint" id="hintB"></div>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary-glow w-100 btn-lg">
-                            <i class="bi bi-play-fill me-2"></i>Hitung
-                        </button>
-                    </form>
+                <!-- Input A -->
+                <div class="keypad-section-label">Nilai A <span style="color:#4a5370">(integer)</span></div>
+                <div class="calc-input-group">
+                    <input type="number" step="1" class="calc-input" id="inputLA"
+                        name="a" placeholder="contoh: 12"
+                        value="{{ hasil.a if hasil and hasil.a is not none else '' }}" required>
+                    <div style="font-size:0.7rem; color:rgba(126,255,178,0.4); text-align:right; margin-top:4px; font-family:'Share Tech Mono',monospace;" id="hintA"></div>
                 </div>
-            </div>
 
-            <!-- Riwayat Logika -->
-            <div class="calc-card mt-4">
-                <div class="calc-card-header">
-                    <i class="bi bi-clock-history me-2"></i>Riwayat
+                <!-- Input B -->
+                <div id="inputLBWrap">
+                    <div class="keypad-section-label">Nilai B <span style="color:#4a5370">(integer)</span></div>
+                    <div class="calc-input-group">
+                        <input type="number" step="1" class="calc-input" id="inputLB"
+                            name="b" placeholder="contoh: 10"
+                            value="{{ hasil.b if hasil and hasil.b is not none else '' }}">
+                        <div style="font-size:0.7rem; color:rgba(126,255,178,0.4); text-align:right; margin-top:4px; font-family:'Share Tech Mono',monospace;" id="hintB"></div>
+                    </div>
                 </div>
-                <div class="calc-card-body p-0">
-                    {% set logic_history = history | selectattr('kategori', 'equalto', 'Logika') | list %}
-                    {% if logic_history %}
-                    <ul class="history-list">
-                        {% for item in logic_history[:8] %}
-                        <li class="history-list-item">
-                            <span class="history-formula-sm">{{ item.formula }}</span>
-                            <span class="history-time-sm">{{ item.waktu }}</span>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                    {% else %}
-                    <div class="empty-mini"><i class="bi bi-clock me-2"></i>Belum ada riwayat</div>
-                    {% endif %}
+
+                <!-- Quick number pad -->
+                <div class="keypad-section-label">Input Cepat</div>
+                <div class="btn-grid btn-grid-4">
+                    {% for n in [7,8,9,'C',4,5,6,'←',1,2,3,'±',0,'00','↵'] %}
+                    <button type="button" class="calc-btn
+                        {% if n == 'C' %}btn-clear
+                        {% elif n == '↵' %}btn-eq btn-wide
+                        {% elif n == '←' %}btn-fn
+                        {% elif n == '±' %}btn-fn
+                        {% endif %}"
+                        onclick="quickInputLogic('{{ n }}')">{{ n }}</button>
+                    {% endfor %}
                 </div>
-            </div>
+
+                <button type="submit" id="logSubmitBtn" style="display:none"></button>
+            </form>
         </div>
 
-        <!-- ── Hasil ── -->
-        <div class="col-lg-7">
-            {% if hasil %}
-                {% if hasil.error %}
-                <div class="result-card result-error animate-in">
-                    <div class="result-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
-                    <h3>Error</h3>
-                    <p>{{ hasil.error }}</p>
-                </div>
-                {% else %}
-                <div class="result-card animate-in">
-                    <div class="result-label">Hasil</div>
-                    <div class="result-value">{{ hasil.result }}</div>
-                    <div class="result-formula">
-                        <i class="bi bi-function me-2"></i>{{ hasil.formula }}
+        <!-- RIGHT: Result -->
+        <div class="calc-result-area">
+            <div class="result-panel">
+                {% if hasil %}
+                    {% if hasil.error %}
+                    <div class="result-display result-display-error animate-in">
+                        <div class="result-display-label"><i class="bi bi-exclamation-triangle-fill"></i> Error</div>
+                        <div class="result-display-value">{{ hasil.error }}</div>
                     </div>
-                    <button class="btn-copy" onclick="copyResult('{{ hasil.result }}')" title="Salin">
-                        <i class="bi bi-clipboard"></i> Salin
-                    </button>
-                </div>
+                    {% else %}
+                    <div class="result-display animate-in">
+                        <div class="result-display-label">Hasil</div>
+                        <div class="result-display-value">{{ hasil.result }}</div>
+                        <div class="result-display-formula">{{ hasil.formula }}</div>
+                        <button class="btn-copy-result" onclick="copyResult('{{ hasil.result }}')">
+                            <i class="bi bi-clipboard"></i> Salin
+                        </button>
+                    </div>
 
-                <div class="steps-card animate-in" style="animation-delay:0.1s">
-                    <div class="steps-header">
-                        <i class="bi bi-list-ol me-2"></i>Langkah-Langkah
+                    <!-- Steps -->
+                    <div class="steps-panel animate-in" style="animation-delay:0.1s">
+                        <div class="steps-panel-header">
+                            <i class="bi bi-list-ol"></i> Langkah-Langkah
+                        </div>
+                        <div class="steps-panel-body">
+                            {% for step in hasil.steps %}
+                            <div class="step-row">
+                                <div class="step-num">
+                                    {% if loop.first %}<i class="bi bi-info-circle-fill" style="font-size:0.6rem"></i>
+                                    {% else %}{{ loop.index }}{% endif %}
+                                </div>
+                                <div class="step-text">{{ step }}</div>
+                            </div>
+                            {% endfor %}
+                        </div>
                     </div>
-                    <div class="steps-body">
-                        {% for step in hasil.steps %}
-                        <div class="step-item" style="animation-delay: {{ loop.index0 * 0.06 }}s">
-                            {% if loop.first %}
-                            <div class="step-num"><i class="bi bi-info-circle-fill"></i></div>
-                            {% else %}
-                            <div class="step-num">{{ loop.index }}</div>
-                            {% endif %}
-                            <div class="step-text font-mono">{{ step }}</div>
+
+                    <!-- Truth Table -->
+                    {% if hasil.truth_table %}
+                    <div class="steps-panel animate-in" style="animation-delay:0.2s">
+                        <div class="steps-panel-header">
+                            <i class="bi bi-table"></i> Tabel Kebenaran
+                        </div>
+                        <div class="truth-table-wrap">
+                            <table class="truth-table">
+                                <thead>
+                                    <tr>
+                                        <th>A</th>
+                                        {% if hasil.operasi != 'not' %}<th>B</th>{% endif %}
+                                        <th>{{ hasil.operasi | upper }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for row in hasil.truth_table %}
+                                    <tr class="{% if row.result == 1 %}tt-true{% endif %}">
+                                        <td><span class="bit-badge bit-{{ row.a }}">{{ row.a }}</span></td>
+                                        {% if hasil.operasi != 'not' %}
+                                        <td><span class="bit-badge bit-{{ row.b }}">{{ row.b }}</span></td>
+                                        {% endif %}
+                                        <td><span class="bit-badge bit-{{ row.result }}">{{ row.result }}</span></td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endif %}
+
+                {% else %}
+                <div class="result-placeholder animate-fade">
+                    <i class="bi bi-diagram-3"></i>
+                    <p>Pilih gerbang logika, isi nilai integer, lalu tekan <strong style="color:#60a5fa">↵</strong></p>
+                </div>
+                {% endif %}
+
+                <!-- History mini -->
+                {% set logic_hist = history | selectattr('kategori','equalto','Logika') | list %}
+                {% if logic_hist %}
+                <div class="steps-panel">
+                    <div class="steps-panel-header">
+                        <i class="bi bi-clock-history"></i> Riwayat
+                        <span style="margin-left:auto; background:rgba(96,165,250,0.15); color:#60a5fa; border-radius:6px; padding:1px 7px; font-size:0.65rem;">
+                            {{ logic_hist | length }}
+                        </span>
+                    </div>
+                    <div class="steps-panel-body" style="padding:6px 8px; max-height:140px;">
+                        {% for item in logic_hist[:6] %}
+                        <div class="history-row" style="margin-bottom:4px">
+                            <span class="history-row-formula">{{ item.formula }}</span>
+                            <span class="history-row-result">{{ item.result }}</span>
                         </div>
                         {% endfor %}
                     </div>
                 </div>
-
-                {% if hasil.truth_table %}
-                <div class="steps-card animate-in" style="animation-delay:0.2s">
-                    <div class="steps-header">
-                        <i class="bi bi-table me-2"></i>Tabel Kebenaran
-                    </div>
-                    <div class="steps-body p-0">
-                        <table class="truth-table">
-                            <thead>
-                                <tr>
-                                    <th>A</th>
-                                    {% if hasil.operasi != 'not' %}<th>B</th>{% endif %}
-                                    <th>{{ hasil.operasi | upper }}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for row in hasil.truth_table %}
-                                <tr class="{% if row.result == 1 %}tt-true{% else %}tt-false{% endif %}">
-                                    <td><span class="bit-badge bit-{{ row.a }}">{{ row.a }}</span></td>
-                                    {% if hasil.operasi != 'not' %}
-                                    <td><span class="bit-badge bit-{{ row.b }}">{{ row.b }}</span></td>
-                                    {% endif %}
-                                    <td><span class="bit-badge bit-{{ row.result }}">{{ row.result }}</span></td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
                 {% endif %}
-                {% endif %}
-            {% else %}
-            <div class="placeholder-card">
-                <div class="placeholder-icon">
-                    <i class="bi bi-diagram-3"></i>
-                </div>
-                <h3>Siap Menghitung</h3>
-                <p>Pilih gerbang, isi nilai integer, lalu klik <strong>Hitung</strong>.</p>
-                <div class="placeholder-ops">
-                    <span>AND</span><span>OR</span><span>NOT</span>
-                    <span>XOR</span><span>NAND</span><span>NOR</span>
-                </div>
             </div>
-            {% endif %}
         </div>
     </div>
 </div>
@@ -184,7 +198,7 @@
 function toBin(n) {
     const v = parseInt(n);
     if (isNaN(v)) return '';
-    return '= ' + (v >>> 0).toString(2).replace(/^0+/, '') || '0';
+    return 'BIN: ' + (v >>> 0).toString(2).replace(/^0+/, '') || '0';
 }
 
 const inpA = document.getElementById('inputLA');
@@ -192,21 +206,54 @@ const inpB = document.getElementById('inputLB');
 const hintA = document.getElementById('hintA');
 const hintB = document.getElementById('hintB');
 
-inpA.addEventListener('input', () => { hintA.textContent = inpA.value ? 'Biner: ' + toBin(inpA.value) : ''; });
-inpB.addEventListener('input', () => { hintB.textContent = inpB.value ? 'Biner: ' + toBin(inpB.value) : ''; });
+inpA.addEventListener('input', () => { hintA.textContent = inpA.value ? toBin(inpA.value) : ''; });
+inpB.addEventListener('input', () => { hintB.textContent = inpB.value ? toBin(inpB.value) : ''; });
+if (inpA.value) hintA.textContent = toBin(inpA.value);
+if (inpB.value) hintB.textContent = toBin(inpB.value);
 
+// Gate select active
 document.querySelectorAll('input[name="operasi"]').forEach(radio => {
     radio.addEventListener('change', function () {
         const wrap = document.getElementById('inputLBWrap');
         wrap.style.display = this.value === 'not' ? 'none' : 'block';
-        document.querySelectorAll('.op-btn').forEach(btn => btn.classList.remove('active'));
-        this.closest('.op-btn').classList.add('active');
+        document.querySelectorAll('#logikaForm .calc-btn').forEach(b => {
+            b.style.background = '';
+            b.style.borderColor = '';
+        });
+        const btn = this.closest('.calc-btn');
+        btn.style.background = 'rgba(96,165,250,0.15)';
+        btn.style.borderColor = 'rgba(96,165,250,0.35)';
     });
 });
-const cur = document.querySelector('input[name="operasi"]:checked');
-if (cur && cur.value === 'not') document.getElementById('inputLBWrap').style.display = 'none';
 
-if (inpA.value) hintA.textContent = 'Biner: ' + toBin(inpA.value);
-if (inpB.value) hintB.textContent = 'Biner: ' + toBin(inpB.value);
+const curL = document.querySelector('input[name="operasi"]:checked');
+if (curL && curL.value === 'not') document.getElementById('inputLBWrap').style.display = 'none';
+
+const focusL = () => {
+    const a = document.getElementById('inputLA');
+    const b = document.getElementById('inputLB');
+    return (document.activeElement === b) ? b : a;
+};
+
+function quickInputLogic(val) {
+    const inp = focusL();
+    if (val === 'C') {
+        document.getElementById('inputLA').value = '';
+        document.getElementById('inputLB').value = '';
+        hintA.textContent = '';
+        hintB.textContent = '';
+    } else if (val === '←') {
+        inp.value = inp.value.slice(0, -1);
+    } else if (val === '±') {
+        if (inp.value) inp.value = (parseInt(inp.value) * -1).toString();
+    } else if (val === '↵') {
+        document.getElementById('logSubmitBtn').click();
+    } else {
+        inp.value += val;
+    }
+    // Update hint
+    hintA.textContent = inpA.value ? toBin(inpA.value) : '';
+    hintB.textContent = inpB.value ? toBin(inpB.value) : '';
+}
 </script>
 {% endblock %}
