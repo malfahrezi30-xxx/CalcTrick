@@ -6,6 +6,37 @@
 document.addEventListener('DOMContentLoaded', function () {
 
     // ──────────────────────────────────────────────
+    //  THEME TOGGLE
+    // ──────────────────────────────────────────────
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    const htmlElement = document.documentElement;
+
+    function updateThemeIcon(theme) {
+        if (!themeIcon) return;
+        if (theme === 'light') {
+            themeIcon.className = 'bi bi-sun-fill';
+        } else {
+            themeIcon.className = 'bi bi-moon-stars-fill';
+        }
+    }
+    
+    // Set initial icon state based on theme attribute
+    updateThemeIcon(htmlElement.getAttribute('data-theme') || 'dark');
+
+    if (themeToggle) {
+        themeToggle.addEventListener('click', function () {
+            const currentTheme = htmlElement.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            htmlElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        });
+    }
+
+
+    // ──────────────────────────────────────────────
     //  CLEAR HISTORY
     // ──────────────────────────────────────────────
     const clearBtn = document.getElementById('clearHistoryBtn');
