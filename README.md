@@ -1,4 +1,4 @@
-# 🧮 CalcPro – Kalkulator Canggih Berbasis Web
+# 🧮 CalcTrick – Kalkulator Canggih Berbasis Web
 
 > Aplikasi web kalkulator canggih dengan tiga kategori utama: Aritmatika, Logika, dan Transformasi Bilangan. Dibangun dengan Python + Flask, tampilan modern glassmorphism, dark/light mode, dan penjelasan langkah demi langkah.
 
@@ -86,8 +86,8 @@ Kalkulator/
 
 ```bash
 # 1. Clone atau download repository
-git clone https://github.com/username/kalkulator-canggih.git
-cd kalkulator-canggih
+git clone https://github.com/malfahrezi30-xxx/CalcTrick.git
+cd CalcTrick
 
 # 2. (Opsional) Buat virtual environment
 python -m venv venv
