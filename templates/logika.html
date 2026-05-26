@@ -3,10 +3,10 @@
 
 {% block content %}
 <style>
-/* CSS khusus untuk Bit Flipper */
+/* CSS khusus untuk Bit Flipper - Cyberpunk Theme */
 .bit-flipper-container {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(212, 175, 55, 0.15);
+    background: rgba(0, 255, 255, 0.02);
+    border: 1px solid rgba(0, 255, 255, 0.15);
     border-radius: 12px;
     padding: 12px;
     margin-bottom: 12px;
@@ -14,7 +14,7 @@
 }
 [data-theme="light"] .bit-flipper-container {
     background: rgba(0, 0, 0, 0.02);
-    border-color: rgba(139, 105, 20, 0.2);
+    border-color: rgba(0, 136, 170, 0.2);
 }
 .bit-flipper-row {
     display: flex;
@@ -26,7 +26,7 @@
     flex: 1;
     height: 38px;
     border-radius: 8px;
-    border: 1px solid rgba(212, 175, 55, 0.2);
+    border: 1px solid rgba(0, 255, 255, 0.2);
     background: var(--bg-btn);
     color: var(--text-btn);
     font-family: var(--font-mono);
@@ -51,22 +51,24 @@
     opacity: 0.7;
 }
 .bit-flip-btn.active {
-    background: var(--gold-main);
-    color: #0c0b08;
-    border-color: var(--gold-bright);
-    box-shadow: var(--glow-gold-sm);
-    text-shadow: 0 0 4px rgba(255,255,255,0.5);
+    background: rgba(0, 255, 255, 0.15);
+    color: var(--cyber-cyan);
+    border-color: var(--cyber-cyan);
+    box-shadow: var(--glow-cyan-sm);
+    text-shadow: 0 0 8px rgba(0, 255, 255, 0.6);
 }
 .bit-flip-btn.active::after {
-    color: #0c0b08;
+    color: var(--cyber-cyan);
     font-weight: 800;
 }
 .bit-flip-btn:hover {
-    border-color: var(--gold-main);
+    border-color: var(--cyber-cyan);
     background: var(--bg-btn-hover);
+    color: var(--cyber-cyan);
 }
 .bit-flip-btn.active:hover {
-    background: var(--gold-bright);
+    background: rgba(0, 255, 255, 0.22);
+    box-shadow: var(--glow-cyan);
 }
 .bit-flipper-info {
     display: flex;
@@ -74,15 +76,16 @@
     background: var(--bg-display);
     border-radius: 8px;
     padding: 6px 12px;
-    border: 1px solid rgba(212, 175, 55, 0.1);
+    border: 1px solid rgba(0, 255, 255, 0.1);
     margin-bottom: 10px;
     font-family: var(--font-mono);
     font-size: 0.8rem;
     color: var(--text-display-sub);
 }
 .bit-flipper-val strong {
-    color: var(--text-display);
+    color: var(--cyber-cyan);
     margin-left: 4px;
+    text-shadow: 0 0 8px rgba(0,255,255,0.4);
 }
 .bit-flipper-actions {
     display: flex;
@@ -92,31 +95,36 @@
     flex: 1;
     padding: 6px 4px;
     border-radius: 8px;
-    border: 1px solid rgba(212, 175, 55, 0.25);
-    background: rgba(212, 175, 55, 0.08);
-    color: var(--gold-main);
+    border: 1px solid rgba(0, 255, 255, 0.25);
+    background: rgba(0, 255, 255, 0.06);
+    color: var(--cyber-cyan);
     font-size: 0.72rem;
     font-weight: 600;
     cursor: pointer;
     transition: var(--transition);
     text-align: center;
+    font-family: var(--font-display);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
 }
 .bit-action-btn:hover {
-    background: rgba(212, 175, 55, 0.15);
-    border-color: var(--gold-main);
-    box-shadow: var(--glow-gold-sm);
+    background: rgba(0, 255, 255, 0.14);
+    border-color: var(--cyber-cyan);
+    box-shadow: var(--glow-cyan-sm);
 }
 .bit-action-btn.btn-reset {
     flex: 0.6;
-    border-color: rgba(200, 90, 80, 0.25);
-    background: rgba(200, 90, 80, 0.08);
-    color: #c0605a;
+    border-color: rgba(255, 0, 110, 0.25);
+    background: rgba(255, 0, 110, 0.06);
+    color: var(--cyber-pink);
 }
 .bit-action-btn.btn-reset:hover {
-    background: rgba(200, 90, 80, 0.15);
-    border-color: #e07060;
+    background: rgba(255, 0, 110, 0.14);
+    border-color: var(--cyber-pink);
+    box-shadow: var(--glow-pink-sm);
 }
 </style>
+
 
 <div class="calculator-body animate-in">
     <div class="calc-top-strip"></div>
@@ -159,7 +167,7 @@
                     ] %}
                     {% for val, sym, label in ops %}
                     <label class="calc-btn btn-fn {% if hasil and hasil.operasi == val %}selected{% elif not hasil and val == 'and' %}selected{% endif %}"
-                           style="{% if hasil and hasil.operasi == val or (not hasil and val == 'and') %}background:rgba(96,165,250,0.15);border-color:rgba(96,165,250,0.35);{% endif %}">
+                           style="{% if hasil and hasil.operasi == val or (not hasil and val == 'and') %}background:rgba(0,255,255,0.12);border-color:rgba(0,255,255,0.4);color:var(--cyber-cyan);{% endif %}">
                         <input type="radio" name="operasi" value="{{ val }}" style="display:none"
                             {% if hasil and hasil.operasi == val %}checked
                             {% elif not hasil and val == 'and' %}checked{% endif %}>
@@ -170,22 +178,22 @@
                 </div>
 
                 <!-- Input A -->
-                <div class="keypad-section-label">Nilai A <span style="color:#4a5370">(integer)</span></div>
+                <div class="keypad-section-label">Nilai A <span style="color:var(--text-muted)">(integer)</span></div>
                 <div class="calc-input-group">
                     <input type="number" step="1" class="calc-input" id="inputLA"
                         name="a" placeholder="contoh: 12"
                         value="{{ hasil.a if hasil and hasil.a is not none else '' }}" required>
-                    <div style="font-size:0.7rem; color:rgba(126,255,178,0.4); text-align:right; margin-top:4px; font-family:'Share Tech Mono',monospace;" id="hintA"></div>
+                    <div style="font-size:0.7rem; color:rgba(0,255,255,0.4); text-align:right; margin-top:4px; font-family:'Share Tech Mono',monospace;" id="hintA"></div>
                 </div>
 
                 <!-- Input B -->
                 <div id="inputLBWrap">
-                    <div class="keypad-section-label">Nilai B <span style="color:#4a5370">(integer)</span></div>
+                    <div class="keypad-section-label">Nilai B <span style="color:var(--text-muted)">(integer)</span></div>
                     <div class="calc-input-group">
                         <input type="number" step="1" class="calc-input" id="inputLB"
                             name="b" placeholder="contoh: 10"
                             value="{{ hasil.b if hasil and hasil.b is not none else '' }}">
-                        <div style="font-size:0.7rem; color:rgba(126,255,178,0.4); text-align:right; margin-top:4px; font-family:'Share Tech Mono',monospace;" id="hintB"></div>
+                        <div style="font-size:0.7rem; color:rgba(0,255,255,0.4); text-align:right; margin-top:4px; font-family:'Share Tech Mono',monospace;" id="hintB"></div>
                     </div>
                 </div>
 
@@ -303,7 +311,7 @@
                 {% else %}
                 <div class="result-placeholder animate-fade">
                     <i class="bi bi-diagram-3"></i>
-                    <p>Pilih gerbang logika, isi nilai integer, lalu tekan <strong style="color:#60a5fa">↵</strong></p>
+                    <p>Pilih gerbang logika, isi nilai integer, lalu tekan <strong style="color:var(--cyber-cyan); text-shadow:0 0 8px rgba(0,255,255,0.5);">↵</strong></p>
                 </div>
                 {% endif %}
 
@@ -313,7 +321,7 @@
                 <div class="steps-panel">
                     <div class="steps-panel-header">
                         <i class="bi bi-clock-history"></i> Riwayat
-                        <span style="margin-left:auto; background:rgba(96,165,250,0.15); color:#60a5fa; border-radius:6px; padding:1px 7px; font-size:0.65rem;">
+                        <span style="margin-left:auto; background:rgba(0,255,255,0.1); color:var(--cyber-cyan); border-radius:6px; padding:1px 7px; font-size:0.65rem;">
                             {{ logic_hist | length }}
                         </span>
                     </div>
@@ -361,8 +369,9 @@ document.querySelectorAll('input[name="operasi"]').forEach(radio => {
             b.style.borderColor = '';
         });
         const btn = this.closest('.calc-btn');
-        btn.style.background = 'rgba(96,165,250,0.15)';
-        btn.style.borderColor = 'rgba(96,165,250,0.35)';
+        btn.style.background = 'rgba(0,255,255,0.12)';
+        btn.style.borderColor = 'rgba(0,255,255,0.4)';
+        btn.style.color = 'var(--cyber-cyan)';
     });
 });
 
